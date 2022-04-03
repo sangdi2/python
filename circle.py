@@ -6,5 +6,5 @@
 import math
 r = input("请输入圆的半径：")
 c = float(r)
-s = math.pi*c*c
+s = math.pi*c**2
 print("圆的面积是:%f" %s)
