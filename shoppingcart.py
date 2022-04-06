@@ -7,7 +7,7 @@ products = [["iphone",6888],["MacPro",14800],["小米6",2499],["Coffffee",31],["
 addproduct=[]
 addindex=[]
 print("-"*6+"商品购物列表"+"-"*6)
-i=0
+
 for i in range(len(products)):
     print(i,end="\t")
     for item in products[i]:
@@ -30,10 +30,9 @@ while flag!="q":
         print("您的输入内容不符合规范")
         continue
 print("-"*6+"商品购物列表"+"-"*6)
-j=0
+
 for j in range(len(addproduct)):
     print(addindex[j],end="\t")
     for name in addproduct[j]:
-
         print(name,end="\t")
     print(" ")

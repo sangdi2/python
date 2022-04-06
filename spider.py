@@ -11,13 +11,62 @@ import xlwt
 def main():
     baseurl="https://movie.douban.com/top250?start="
     datalist=getdata(baseurl)
+    savepath="豆瓣电影top250.xls"
+    savedata(datalist,savepath)
 
+
+findlink=re.compile(r'<a href="(.*?)">')
+findimgsrc=re.compile(r'<img.*src="(.*?)"',re.S)
+findtitle=re.compile(r'<span class="title">(.*)</span>')
+findrating=re.compile(r'<span class="rating_num" property="v:average">(.*)</span>')
+findjudge=re.compile(r'<span>(\d*)人评价</span>')
+findinq=re.compile(r'<span class="inq">(.*)</span>')
+findbd=re.compile(r'<p class="">(.*?)</p>',re.S)
 
 
 def getdata(url):
     datalist=[]
     for i in range(0,10):
         html=askurl(url+str(i*25))
+        soup=BeautifulSoup(html,"html.parser")
+        for item in soup.find_all("div",class_="item"):
+            data=[]
+            item=str(item)
+
+            link=re.findall(findlink,item)[0]
+            print(link)
+            data.append(link)
+
+            imgsrc=re.findall(findimgsrc,item)[0]
+            data.append(imgsrc)
+
+            title=re.findall(findtitle,item)
+            if len(title)==2:
+                data.append(title[0])
+                data.append(title[1].replace("/",""))
+            else:
+                data.append(title[0])
+                data.append(" ")
+
+            rating=re.findall(findrating,item)[0]
+            data.append(rating)
+
+            judge=re.findall(findjudge,item)[0]
+            data.append(judge)
+
+            inq=re.findall(findinq,item)
+            if len(inq)!=0:
+                data.append(inq[0].replace("。",""))
+            else:
+                data.append(" ")
+
+            bd=re.findall(findbd,item)[0]
+            bd=re.sub('<br(\s+)?/>(\s+)?'," ",bd)
+            bd=re.sub('/'," ",bd)
+            data.append(bd.strip())
+
+            datalist.append(data)
+
     return datalist
 
 
@@ -37,6 +86,22 @@ def askurl(url):
         if hasattr(e,"reason"):
             print(e.reason)
     return html
+
+
+def savedata(datalist,savepath):
+    workbook=xlwt.Workbook(encoding="utf-8",style_compression=True)
+    sheet=workbook.add_sheet("sheet1",cell_overwrite_ok=True)
+    col=("电影详情链接","图片链接","影片中文名","影片外国名","评分","评价数","概况","相关信息")
+    for i in range(0,8):
+        sheet.write(0,i,col[i])
+    for i in range(0,250):
+        print("第%d条"%(i+1))
+        data=datalist[i]
+        for j in range(0,8):
+            sheet.write(i+1,j,data[j])
+    workbook.save(savepath)
+
+
 
 if __name__=="__main__":
     main()
