@@ -12,7 +12,9 @@ def main():
     baseurl="https://movie.douban.com/top250?start="
     datalist=getdata(baseurl)
     savepath="豆瓣电影top250.xls"
-    savedata(datalist,savepath)
+    savedb="movie.db"
+    savedatadb(datalist,savedb)
+    # savedata(datalist,savepath)
 
 
 findlink=re.compile(r'<a href="(.*?)">')
@@ -101,6 +103,49 @@ def savedata(datalist,savepath):
             sheet.write(i+1,j,data[j])
     workbook.save(savepath)
 
+
+def savedatadb(datalist,savedb):
+    init_db(savedb)
+    conn=sqlite3.connect(savedb)
+    cur=conn.cursor()
+    for item in datalist:
+        for index in range(len(item)):
+            if index==4 or index==5:
+                continue
+            item[index]='"'+item[index]+'"'
+        sql='''
+            insert into movie(
+            info_link,pic_link,cname,ename,score,rated,instroduction,info
+            )values (%s)
+        '''%",".join(item)
+        cur.execute(sql)
+        conn.commit()
+    cur.execute(sql)
+    conn.close()
+
+
+
+
+def init_db(savedb):
+     sql='''
+     create table movie
+     (
+     id integer primary key autoincrement,
+     info_link text,
+     pic_link text,
+     cname varchar,
+     ename varchar,
+     score numeric,
+     rated numeric,
+     instroduction text,
+     info text
+     )
+     '''
+     conn =sqlite3.connect(savedb)
+     cursour =conn.cursor()
+     cursour.execute(sql)
+     conn.commit()
+     conn.close()
 
 
 if __name__=="__main__":
